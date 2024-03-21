@@ -1,17 +1,15 @@
 package org.ordering.order.service.domain.mapper;
 
-import org.ordering.domain.valueobject.CustomerId;
-import org.ordering.domain.valueobject.Money;
-import org.ordering.domain.valueobject.ProductId;
-import org.ordering.domain.valueobject.RestaurantId;
+import org.ordering.domain.valueobject.*;
 import org.ordering.order.service.domain.dto.create.CreateOrderCommand;
 import org.ordering.order.service.domain.dto.create.CreateOrderResponse;
 import org.ordering.order.service.domain.dto.create.OrderAddress;
+import org.ordering.order.service.domain.dto.message.CustomerModel;
 import org.ordering.order.service.domain.dto.track.TrackOrderResponse;
-import org.ordering.order.service.domain.entity.Order;
-import org.ordering.order.service.domain.entity.OrderItem;
-import org.ordering.order.service.domain.entity.Product;
-import org.ordering.order.service.domain.entity.Restaurant;
+import org.ordering.order.service.domain.entity.*;
+import org.ordering.order.service.domain.event.OrderPaidEvent;
+import org.ordering.order.service.domain.outbox.model.approval.OrderApprovalEventPayload;
+import org.ordering.order.service.domain.outbox.model.approval.OrderApprovalEventProduct;
 import org.ordering.order.service.domain.valueobject.StreetAddress;
 
 import java.util.List;
@@ -68,5 +66,24 @@ public class OrderDataMapper {
                 orderAddress.getCity()
         );
     }
-
+    public Customer customerModelToCustomer(CustomerModel customerModel) {
+        return new Customer(new CustomerId(UUID.fromString(customerModel.getId())),
+                customerModel.getUsername(),
+                customerModel.getFirstName(),
+                customerModel.getLastName());
+    }
+    public OrderApprovalEventPayload orderPaidEventToOrderApprovalEventPayload(OrderPaidEvent orderPaidEvent){
+        return OrderApprovalEventPayload.builder()
+                .orderId(orderPaidEvent.getOrder().toString())
+                .restaurantOrderStatus(RestaurantOrderStatus.PAID.name())
+                .restaurantId(orderPaidEvent.getOrder().getRestaurantId().toString())
+                .price(orderPaidEvent.getOrder().getPrice().getAmount())
+                .products(orderPaidEvent.getOrder().getItems().stream().map(orderItem ->
+                        OrderApprovalEventProduct.builder()
+                                .Id(orderItem.getProduct().getId().getValue().toString())
+                                .quantity(orderItem.getQuantity())
+                                .build()).collect(Collectors.toList()))
+                .createdAt(orderPaidEvent.getCreatedAt())
+                .build();
+    }
 }
