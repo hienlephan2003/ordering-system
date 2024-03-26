@@ -10,6 +10,7 @@ import org.ordering.order.service.domain.entity.Product;
 import org.ordering.order.service.domain.valueobject.OrderItemId;
 import org.ordering.order.service.domain.valueobject.StreetAddress;
 import org.ordering.order.service.domain.valueobject.TrackingId;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.ordering.order.service.domain.entity.Order.FAILURE_MESSAGE_DELIMITER;
-
+@Component
 public class OrderDataAccessMapper {
     public OrderEntity orderToOrderEntity(Order order){
         OrderEntity orderEntity =  OrderEntity.builder()

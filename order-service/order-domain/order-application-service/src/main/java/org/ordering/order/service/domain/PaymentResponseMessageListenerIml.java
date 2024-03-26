@@ -21,84 +21,27 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.ordering.domain.DomainConstants.UTC;
+import static org.ordering.order.service.domain.entity.Order.FAILURE_MESSAGE_DELIMITER;
 
 @Slf4j
 public class PaymentResponseMessageListenerIml implements PaymentResponseMessageListener {
-    //outbox helper for update outbox message
-    private final PaymentOutboxHelper paymentOutboxHelper;
-    private final ApprovalOutboxHelper approvalOutboxHelper;
-    //order domain service for update service logic
-    private final OrderDomainService orderDomainService;
-    // order saga helper for get saga status from order status
-    private final OrderSagaHelper orderSagaHelper;
-    //order data mapper for mapping from event to event payload
-    //order repository to connect to db
-    private final OrderRepository orderRepository;
-    private final OrderDataMapper orderDataMapper;
-    public PaymentResponseMessageListenerIml(PaymentOutboxHelper paymentOutboxHelper, ApprovalOutboxHelper approvalOutboxHelper, OrderDomainService orderDomainService, OrderSagaHelper orderSagaHelper, OrderRepository orderRepository, OrderDataMapper orderDataMapper) {
-        this.paymentOutboxHelper = paymentOutboxHelper;
-        this.approvalOutboxHelper = approvalOutboxHelper;
-        this.orderDomainService = orderDomainService;
-        this.orderSagaHelper = orderSagaHelper;
-        this.orderRepository = orderRepository;
-        this.orderDataMapper = orderDataMapper;
+    private final OrderPaymentSaga orderPaymentSaga;
+
+    public PaymentResponseMessageListenerIml(OrderPaymentSaga orderPaymentSaga) {
+        this.orderPaymentSaga = orderPaymentSaga;
     }
 
     @Override
     public void paymentCompleted(PaymentResponse paymentResponse) {
-        //get order payment outbox message
-        Optional<OrderPaymentOutboxMessage> orderPaymentOutboxMessageResponse =
-                paymentOutboxHelper.getPaymentOutboxMessageBySagaIdAndSagaStatus(UUID.fromString(paymentResponse.getSagaId()), SagaStatus.STARTED);
-        if(orderPaymentOutboxMessageResponse.isEmpty()){
-            log.info("An outbox message with saga id: {} is already processed!", paymentResponse.getSagaId());
-            return;
-        }
-        OrderPaymentOutboxMessage orderPaymentOutboxMessage = orderPaymentOutboxMessageResponse.get();
-        //create order paid event
-        Optional<Order> order = orderSagaHelper.findOrder(paymentResponse.getOrderId());
-        OrderPaidEvent orderPaidEvent = orderDomainService.payOrder(order.get());
-        // get new saga status from order status
-        SagaStatus sagaStatus = orderSagaHelper.orderStatusToSagaStatus(orderPaidEvent.getOrder().getOrderStatus());
-        //update outbox message and save
-        orderPaymentOutboxMessage.setProcessedAt(ZonedDateTime.now(ZoneId.of(UTC)));
-        orderPaymentOutboxMessage.setOrderStatus(orderPaidEvent.getOrder().getOrderStatus());
-        orderPaymentOutboxMessage.setSagaStatus(sagaStatus);
-        paymentOutboxHelper.save(orderPaymentOutboxMessage);
-        //create approval outbox message and save
-        approvalOutboxHelper.saveApprovalOutboxMessage(orderDataMapper.orderPaidEventToOrderApprovalEventPayload(orderPaidEvent),
-                orderPaidEvent.getOrder().getOrderStatus(),
-                sagaStatus,
-                OutboxStatus.STARTED,
-                UUID.fromString(paymentResponse.getSagaId())
-                );
-        //log result
-        log.info("Order with id: {} is paid", orderPaidEvent.getOrder().getId().getValue());
+        orderPaymentSaga.process(paymentResponse);
+        log.info("Order payment saga process operation is completed for order id {}", paymentResponse.getOrderId());
     }
 
     @Override
     public void paymentCancelled(PaymentResponse paymentResponse) {
-        // get payment request outbox message response
-        Optional<OrderPaymentOutboxMessage> orderPaymentOutboxMessage = paymentOutboxHelper.getPaymentOutboxMessageBySagaIdAndSagaStatus(
-                UUID.fromString(paymentResponse.getSagaId()),
-                getCurrentSagaStatus(paymentResponse.getPaymentStatus())
-        );
-        //if empty -> already roll backed.
-        if(orderPaymentOutboxMessage.isEmpty()){
-            log.error("");
-        }
-        //get payment request outbox message
-        //do service logic: rollback payment for order
-        //get saga status from order status
-        //update payment request outbox message
-        //update approval outbox message
-        //log result
+        orderPaymentSaga.rollback(paymentResponse);
+        log.info("Order is roll backed for order id: {} with failure messages: {}",
+                paymentResponse.getOrderId(),
+                String.join(FAILURE_MESSAGE_DELIMITER, paymentResponse.getFailureMessages()));
     }
-    private SagaStatus[] getCurrentSagaStatus(PaymentStatus paymentStatus) {
-        return switch (paymentStatus) {
-            case COMPLETED -> new SagaStatus[] { SagaStatus.STARTED };
-            case CANCELLED -> new SagaStatus[] { SagaStatus.PROCESSING };
-            case FAILED -> new SagaStatus[] { SagaStatus.STARTED, SagaStatus.PROCESSING };
-        };
-    }
-
 }

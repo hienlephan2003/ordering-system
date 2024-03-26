@@ -6,9 +6,10 @@ import org.ordering.order.service.dataaccess.order.repository.OrderJpaRepository
 import org.ordering.order.service.domain.entity.Order;
 import org.ordering.order.service.domain.repository.OrderRepository;
 import org.ordering.order.service.domain.valueobject.TrackingId;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-
+@Repository
 public class OrderRepositoryImpl implements OrderRepository {
     private final OrderJpaRepository orderJpaRepository;
     private final OrderDataAccessMapper orderDataAccessMapper;

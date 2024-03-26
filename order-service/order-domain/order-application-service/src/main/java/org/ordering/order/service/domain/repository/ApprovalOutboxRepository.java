@@ -6,6 +6,7 @@ import org.ordering.saga.SagaStatus;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ApprovalOutboxRepository {
     Optional<List<OrderApprovalOutboxMessage>> findByTypeAndOutboxStatusAndSagaStatus(
@@ -15,9 +16,9 @@ public interface ApprovalOutboxRepository {
     );
     Optional<OrderApprovalOutboxMessage> findByTypeAndSagaIdAndOutboxStatus(
             String type,
-            SagaStatus sagaStatus,
-            String sagaId
-    );
+            UUID sagaId,
+            SagaStatus... sagaStatus
+            );
     OrderApprovalOutboxMessage save(OrderApprovalOutboxMessage message);
     void deleteByTypeAndOutboxStatusAndSagaStatus(String type,OutboxStatus outboxStatus, SagaStatus... sagaStatuses);
 }

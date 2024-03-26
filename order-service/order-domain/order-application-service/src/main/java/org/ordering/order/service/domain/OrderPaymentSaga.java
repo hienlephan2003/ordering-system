@@ -18,6 +18,7 @@ import org.ordering.order.service.domain.repository.OrderRepository;
 import org.ordering.outbox.OutboxStatus;
 import org.ordering.saga.SagaStatus;
 import org.ordering.saga.SagaStep;
+import org.springframework.stereotype.Component;
 
 import java.rmi.server.UID;
 import java.time.ZoneId;
@@ -28,6 +29,7 @@ import java.util.UUID;
 import static org.ordering.domain.DomainConstants.UTC;
 
 @Slf4j
+@Component
 public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
     private final PaymentOutboxHelper paymentOutboxHelper;
     private final ApprovalOutboxHelper approvalOutboxHelper;
@@ -50,7 +52,7 @@ public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
         //get payment request outbox message
         Optional<OrderPaymentOutboxMessage> orderPaymentOutboxMessageResponse =
                 paymentOutboxHelper.getPaymentOutboxMessageBySagaIdAndSagaStatus(
-                        UUID.fromString(data.getSagaId()),
+                        (data.getSagaId()),
                         getSagaStatusFromPaymentStatus(data.getPaymentStatus())
                 );
         //if empty -> throw exception
@@ -74,7 +76,7 @@ public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
                 orderPaidEvent.getOrder().getOrderStatus(),
                 sagaStatus,
                 OutboxStatus.STARTED,
-                UUID.fromString(data.getSagaId())
+                (data.getSagaId())
                 );
         //log information
         log.info("Order with id: {} is paid", orderPaidEvent.getOrder().getId().getValue());
@@ -86,7 +88,7 @@ public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
         //get payment request outbox message
         Optional<OrderPaymentOutboxMessage> orderPaymentOutboxMessageResponse =
                 paymentOutboxHelper.getPaymentOutboxMessageBySagaIdAndSagaStatus(
-                    UUID.fromString(data.getSagaId()),
+                    (data.getSagaId()),
                         getSagaStatusFromPaymentStatus(data.getPaymentStatus())
         );
         //if empty -> throw exception
@@ -111,14 +113,14 @@ public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
         }
     }
     private OrderApprovalOutboxMessage getUpdateApprovalOutboxMessage(
-            String sagaId,
+            UUID sagaId,
             OrderStatus orderStatus,
             SagaStatus sagaStatus
     ){
         //find order approval outbox message
         Optional<OrderApprovalOutboxMessage> orderApprovalOutboxMessageResponse = approvalOutboxHelper.getApprovalOutboxMessageBySagaStatusAndSagaId(
-                SagaStatus.COMPENSATING,
-                sagaId
+                sagaId,
+                SagaStatus.COMPENSATING
         );
         if (orderApprovalOutboxMessageResponse.isEmpty()) {
             throw new OrderDomainException("Approval outbox message could not be found in " +
@@ -131,8 +133,8 @@ public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
         orderApprovalOutboxMessage.setSagaStatus(sagaStatus);
         return orderApprovalOutboxMessage;
     }
-    private Order findOrderById(String orderId){
-        Optional<Order> order = orderRepository.findById(new OrderId(UUID.fromString(orderId)));
+    private Order findOrderById(UUID orderId){
+        Optional<Order> order = orderRepository.findById(new OrderId((orderId)));
         if(order.isEmpty()){
             log.error("Order with id: {} could not be found!", orderId);
             throw new OrderNotFoundException("Order with id " + orderId + " could not be found!");

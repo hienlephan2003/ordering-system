@@ -7,15 +7,18 @@ import org.ordering.order.service.domain.dto.create.OrderAddress;
 import org.ordering.order.service.domain.dto.message.CustomerModel;
 import org.ordering.order.service.domain.dto.track.TrackOrderResponse;
 import org.ordering.order.service.domain.entity.*;
+import org.ordering.order.service.domain.event.OrderCancelledEvent;
 import org.ordering.order.service.domain.event.OrderPaidEvent;
 import org.ordering.order.service.domain.outbox.model.approval.OrderApprovalEventPayload;
 import org.ordering.order.service.domain.outbox.model.approval.OrderApprovalEventProduct;
+import org.ordering.order.service.domain.outbox.model.payment.OrderPaymentEventPayload;
 import org.ordering.order.service.domain.valueobject.StreetAddress;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
+@Component
 public class OrderDataMapper {
     public Restaurant createOrderCommandToRestaurant(CreateOrderCommand createOrderCommand){
         return Restaurant.builder()
@@ -67,7 +70,7 @@ public class OrderDataMapper {
         );
     }
     public Customer customerModelToCustomer(CustomerModel customerModel) {
-        return new Customer(new CustomerId(UUID.fromString(customerModel.getId())),
+        return new Customer(new CustomerId((customerModel.getId())),
                 customerModel.getUsername(),
                 customerModel.getFirstName(),
                 customerModel.getLastName());
@@ -85,5 +88,15 @@ public class OrderDataMapper {
                                 .build()).collect(Collectors.toList()))
                 .createdAt(orderPaidEvent.getCreatedAt())
                 .build();
+    }
+    public OrderPaymentEventPayload orderCancelledEventToOrderPaymentEventPayload(OrderCancelledEvent orderCancelledEvent){
+        return OrderPaymentEventPayload.builder()
+                .customerId(orderCancelledEvent.getOrder().getCustomerId().getValue().toString())
+                .orderId(orderCancelledEvent.getOrder().getId().getValue().toString())
+                .price(orderCancelledEvent.getOrder().getPrice().getAmount())
+                .createdAt(orderCancelledEvent.getCreatedAt())
+                .paymentOrderStatus(PaymentOrderStatus.CANCELLED.name())
+                .build();
+
     }
 }

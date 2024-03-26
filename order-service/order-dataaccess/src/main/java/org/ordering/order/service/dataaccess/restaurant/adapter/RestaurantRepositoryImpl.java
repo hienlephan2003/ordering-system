@@ -7,11 +7,12 @@ import org.ordering.domain.valueobject.RestaurantId;
 import org.ordering.order.service.dataaccess.restaurant.mapper.RestaurantDataAccessMapper;
 import org.ordering.order.service.domain.entity.Restaurant;
 import org.ordering.order.service.domain.repository.RestaurantRepository;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+@Component
 public class RestaurantRepositoryImpl implements RestaurantRepository {
     private final RestaurantJpaRepository restaurantJpaRepository;
     private final RestaurantDataAccessMapper restaurantDataAccessMapper;

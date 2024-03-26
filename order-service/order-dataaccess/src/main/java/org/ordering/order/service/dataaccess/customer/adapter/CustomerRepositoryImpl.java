@@ -4,10 +4,11 @@ import org.ordering.order.service.dataaccess.customer.mapper.CustomerDataAccessM
 import org.ordering.order.service.dataaccess.customer.repository.CustomerJpaRepository;
 import org.ordering.order.service.domain.entity.Customer;
 import org.ordering.order.service.domain.repository.CustomerRepository;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.UUID;
-
+@Component
 public class CustomerRepositoryImpl implements CustomerRepository {
     private final CustomerJpaRepository customerJpaRepository;
     private final CustomerDataAccessMapper customerDataAccessMapper;

@@ -34,7 +34,9 @@ public class OrderDomainServiceIml implements OrderDomainService{
 
     @Override
     public OrderPaidEvent payOrder(Order order) {
-        return null;
+        order.pay();
+        log.info("Order with id: {} is paid", order.getId().getValue());
+        return new OrderPaidEvent(order, ZonedDateTime.now(ZoneId.of(UTC)));
     }
 
     @Override
