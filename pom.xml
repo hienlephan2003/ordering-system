@@ -20,6 +20,8 @@
         <module>infrastructure/kafka/kafka-producer</module>
         <module>infrastructure/outbox</module>
         <module>customer-service</module>
+        <module>customer-service/customer-application</module>
+        <module>customer-service/customer-domain/customer-domain-core</module>
     </modules>
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -32,6 +34,32 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+            <groupId>org.ordering</groupId>
+            <artifactId>customer-domain-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ordering</groupId>
+            <artifactId>customer-application-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ordering</groupId>
+            <artifactId>customer-dataaccess</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ordering</groupId>
+            <artifactId>customer-messaging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ordering</groupId>
+            <artifactId>customer-application</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
                 <groupId>org.ordering</groupId>
                 <artifactId>order-domain-core</artifactId>
                 <version>${project.version}</version>

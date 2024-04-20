@@ -19,7 +19,7 @@ spring:
     hibernate:
       ddl-auto: none
     defer-datasource-initialization: true
-#    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   #  jpa:
 #  open-in-view: false
@@ -31,9 +31,7 @@ spring:
 #      hibernate:
 #        dialect: org.hibernate.dialect.PostgreSQL9Dialect
   datasource:
-    url: jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres?user=postgres.bfucpamnaguhdpfjiuuh&password=DNKqMcs6T6EQ78lb
-    username: postgres.bfucpamnaguhdpfjiuuh
-    password: DNKqMcs6T6EQ78lb
+    url: jdbc:jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres?user=postgres.bfucpamnaguhdpfjiuuh&password=agdOmhAk9yFDwPYA
     driver-class-name: org.postgresql.Driver
 
 

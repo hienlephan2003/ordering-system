@@ -5,19 +5,17 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.ordering</groupId>
-        <artifactId>ordering-system</artifactId>
+        <artifactId>customer-domain</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>customer-service</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>customer-domain</module>
-        <module>customer-container</module>
-        <module>customer-dataaccess</module>
-        <module>customer-application</module>
-        <module>customer-messaging</module>
-    </modules>
+    <artifactId>customer-domain-core</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.ordering</groupId>
+            <artifactId>common-domain</artifactId>
+        </dependency>
+    </dependencies>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

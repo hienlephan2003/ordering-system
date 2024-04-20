@@ -27,14 +27,11 @@ public class PaymentOutboxEntity {
     private String type;
     @Column(columnDefinition = "jsonb")
     private String payload;
-    @Column(name = "saga_status")
-    @ColumnTransformer(write="?::saga_status")
     @Enumerated(EnumType.STRING)
     private SagaStatus sagaStatus;
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
     @Enumerated(EnumType.STRING)
-    @Column(name = "outbox_status", columnDefinition = "outbox_status")
     private OutboxStatus outboxStatus;
     @Version
     private int version;
