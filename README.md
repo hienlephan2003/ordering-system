@@ -25,9 +25,6 @@ This project is a food ordering server implemented with microservice architectur
 6. **Run the Application**: Start each microservice by running the Spring Boot applications.
 7. **Explore the APIs**: Use tools like Postman to explore and interact with the APIs exposed by the microservices.
 
-## Architecture Overview
-![Architecture Diagram](architecture_diagram.png)
-
 ## Documentation
 - For detailed API documentation, refer to the Swagger documentation provided with each microservice.
 - For understanding the domain model and business logic, refer to the codebase and relevant documentation within each microservice.
